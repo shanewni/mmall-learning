@@ -30,8 +30,8 @@ public class CartServiceImpl implements ICartService {
     private ProductMapper productMapper;
 
     public ServerResponse<CartVo> add(Integer count, Integer userId, Integer productId) {
-        if(productId == null || count == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        if (productId == null || count == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
 
         Cart cart = cartMapper.selectByUserIdProductId(userId, productId);
@@ -42,9 +42,8 @@ public class CartServiceImpl implements ICartService {
             cartItem.setChecked(Const.Cart.CHECKED);
             cartItem.setQuantity(count);
             cartMapper.insert(cartItem);
-            return ServerResponse.createBySuccessMessage("新增购物车成功");
         } else {
-            count = cart.getQuantity() + count;
+           count = cart.getQuantity() + count;
             cart.setQuantity(count);
             cartMapper.updateByPrimaryKeySelective(cart);
         }
@@ -52,8 +51,8 @@ public class CartServiceImpl implements ICartService {
     }
 
     public ServerResponse<CartVo> update(Integer count, Integer userId, Integer productId) {
-        if(productId == null || count == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        if (productId == null || count == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
 
         Cart cart = cartMapper.selectByUserIdProductId(userId, productId);
@@ -64,28 +63,28 @@ public class CartServiceImpl implements ICartService {
         return this.list(userId);
     }
 
-    public  ServerResponse<CartVo> delete(Integer userId,String productIds){
+    public ServerResponse<CartVo> delete(Integer userId, String productIds) {
         List<String> productArray = Splitter.on(".").splitToList(productIds);
-        if (CollectionUtils.isEmpty(productArray)){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(),ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        if (CollectionUtils.isEmpty(productArray)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
         }
-        cartMapper.deleteByUserIdProductIds(userId,productArray);
+        cartMapper.deleteByUserIdProductIds(userId, productArray);
         return this.list(userId);
     }
 
-    public  ServerResponse<CartVo> selectAll(Integer userId,Integer productId,Integer checked){
-        cartMapper.checkedOrUncheckedProduct(userId,productId,checked);
+    public ServerResponse<CartVo> selectAll(Integer userId, Integer productId, Integer checked) {
+        cartMapper.checkedOrUncheckedProduct(userId, productId, checked);
         return this.list(userId);
     }
 
-    public  ServerResponse<Integer> getCartProductCount(Integer userId){
-        if (userId  == null){
+    public ServerResponse<Integer> getCartProductCount(Integer userId) {
+        if (userId == null) {
             return ServerResponse.createBySuccess(0);
         }
         return ServerResponse.createBySuccess(cartMapper.getCartProductCount(userId));
     }
 
-    public ServerResponse<CartVo> list (Integer userId){
+    public ServerResponse<CartVo> list(Integer userId) {
         CartVo cartVo = this.getCartVoLimit(userId);
         return ServerResponse.createBySuccess(cartVo);
     }
@@ -103,7 +102,7 @@ public class CartServiceImpl implements ICartService {
             cartProductVoItem.setUserId(cartItem.getUserId());
             cartProductVoItem.setProductId(cartItem.getProductId());
             Product product = productMapper.selectByPrimaryKey(cartItem.getProductId());
-            if (product != null){
+            if (product != null) {
                 cartProductVoItem.setProductMainImage(product.getMainImage());
                 cartProductVoItem.setProductName(product.getName());
                 cartProductVoItem.setProductSubtitle(product.getSubtitle());
@@ -112,10 +111,10 @@ public class CartServiceImpl implements ICartService {
                 cartProductVoItem.setProductStock(product.getStock());
 
                 int buyLimitCount = 0;
-                if (product.getStock() >= cartItem.getQuantity()){
+                if (product.getStock() >= cartItem.getQuantity()) {
                     buyLimitCount = cartItem.getQuantity();
                     cartProductVoItem.setLimitQuantity(Const.Cart.LIMIT_NUM_SUCCESS);
-                }else{
+                } else {
                     buyLimitCount = product.getStock();
                     cartProductVoItem.setLimitQuantity(Const.Cart.LIMIT_NUM_FAIL);
                     Cart cartForQuantity = new Cart();
@@ -124,12 +123,12 @@ public class CartServiceImpl implements ICartService {
                     cartMapper.updateByPrimaryKeySelective(cartForQuantity);
                 }
                 cartProductVoItem.setQuantity(buyLimitCount);
-                cartProductVoItem.setProductTotalPrice(BigDecimalUtil.mul(product.getPrice().doubleValue(),cartProductVoItem.getQuantity()));
+                cartProductVoItem.setProductTotalPrice(BigDecimalUtil.mul(product.getPrice().doubleValue(), cartProductVoItem.getQuantity()));
                 cartProductVoItem.setProductChecked(cartItem.getChecked());
             }
-            if(cartItem.getChecked() == Const.Cart.CHECKED){
+            if (cartItem.getChecked() == Const.Cart.CHECKED) {
                 //如果已经勾选,增加到整个的购物车总价中
-                cartTotalPrice = BigDecimalUtil.add(cartTotalPrice.doubleValue(),cartProductVoItem.getProductTotalPrice().doubleValue());
+                cartTotalPrice = BigDecimalUtil.add(cartTotalPrice.doubleValue(), cartProductVoItem.getProductTotalPrice().doubleValue());
             }
             cartProductVoList.add(cartProductVoItem);
         }
@@ -141,8 +140,8 @@ public class CartServiceImpl implements ICartService {
         return cartVo;
     }
 
-    private boolean getAllCheckedStatus(Integer userId){
-        if(userId == null){
+    private boolean getAllCheckedStatus(Integer userId) {
+        if (userId == null) {
             return false;
         }
         return cartMapper.selectCartProductCheckedStatusByUserId(userId) == 0;

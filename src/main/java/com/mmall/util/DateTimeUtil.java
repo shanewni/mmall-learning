@@ -16,7 +16,7 @@ public class DateTimeUtil {
         return dateTime.toDate();
     }
 
-    public static String dataToStr(Date date) {
+    public static String dateToStr(Date date) {
         if (date == null) {
             return StringUtils.EMPTY;
         }
